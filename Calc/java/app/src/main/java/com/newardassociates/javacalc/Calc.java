@@ -1,10 +1,15 @@
 package com.newardassociates.javacalc;
 
 import com.newardassociates.javacalc.parser.*;
+
+import java.util.HashMap;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 class CalcVisitor extends LabeledExprBaseVisitor<Integer> {
+
+    private HashMap<String, Integer> memory = new HashMap<>(); // memory for variables
 
 	@Override public Integer visitInt(LabeledExprParser.IntContext ctx) {
         int value = Integer.valueOf(ctx.INT().getText());
@@ -47,6 +52,20 @@ class CalcVisitor extends LabeledExprBaseVisitor<Integer> {
             System.out.println("PRINT (line " + ctx.getStart().getLine() + ") " + ctx.expr().getText() + " = " + lineValue);
         }
         return lineValue;
+    }
+
+	@Override public Integer visitId(LabeledExprParser.IdContext ctx) { 
+        String id = ctx.ID().getText();
+        Integer value = memory.get(id);
+        System.out.println("ID: " + id + " = " + value);
+        return value;
+    }
+    @Override public Integer visitAssign(LabeledExprParser.AssignContext ctx) { 
+        String id = ctx.ID().getText();
+        int value = visit(ctx.expr());
+        memory.put(id, value);
+        System.out.println("ASSIGN: " + id + " = " + value);
+        return value;
     }
 }
 
